@@ -8,6 +8,110 @@ module.exports = {
   sendMessage
 }
 
+const session = {
+  // delete dcloud session
+  async delete(personEmail, words, i) {
+    // authorize
+    if (!isAuthorized(personEmail, 'session.delete')) {
+      return `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
+    } else {
+      // continue
+      const datacenter = words[i + 2].toUpperCase()
+      const id = words[i + 3]
+      console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
+      // set up mongo query
+      const query = {
+        id,
+        datacenter
+      }
+      try {
+        // remove from cloud mongo
+        const results = await db.removeOne('dcloud', 'session', query)
+        if (results.deletedCount === 1) {
+          // success
+          console.log(`collab-toolbot found and deleted dCloud session info for '${datacenter} ${id}'.`)
+          // respond in Teams
+          return `Successfully deleted dCloud session info for **${datacenter}** **${id}**.`
+        } else {
+          // didn't find matching session
+          console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}' to delete.`)
+          return `Failed to delete dCloud session info for **${datacenter}** **${id}** - not found.`
+        }
+      } catch (e) {
+        // failed db connection?
+        console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}':`, e.message)
+        return `Error deleting dCloud session info for **${datacenter}** **${id}**: ${e.message}`
+      }
+    }
+  },
+  async get() {
+    // authorize
+    if (!isAuthorized(personEmail, 'session.get')) {
+      return `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
+    } else {
+      // continue
+      const datacenter = words[i + 2].toUpperCase()
+      const id = words[i + 3]
+      console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
+      // set up mongo query
+      const query = {
+        id,
+        datacenter
+      }
+      try {
+        // remove from cloud mongo
+        const results = await db.find('dcloud', 'session', query)
+        if (results) {
+          // found
+          console.log(`collab-toolbot found and dCloud session info for '${datacenter} ${id}'.`)
+          // trim results
+          const smallResults = {
+            datacenter: results.datacenter,
+            id: results.id,
+            demo: results.demo,
+            version: results.version,
+            instant: results.instant,
+            owner: results.owner,
+            status: results.status,
+            anycpwd: results.anycpwd
+          }
+          // add DID
+          try {
+            smallResults.did1 = results.dids.did.find(v => v.name === 'DID1').number
+          } catch (e) {
+            console.log('collab-toolbot failed to find DID1 for', datcenter, id)
+          }
+          // add public IP
+          try {
+            smallResults.publicIp = results.translations.translation.find(v => v.inside === '198.18.135.68').outside
+          } catch (e) {
+            console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datcenter, id)
+          }
+          if (results.instant) {
+            // instant demo = true
+            // add instant demo VPN public IP
+            try {
+              smallResults.vpnPublicIp = results.translations.translation.find(v => v.inside === '198.18.133.254').outside
+            } catch (e) {
+              console.log('collab-toolbot failed to find public IP for', '198.18.133.254', 'in', datcenter, id)
+            }
+          }
+          // respond in Teams with formatted JSON code
+          return '```json\n' + JSON.stringify(smallResults, null, 2) + '\n```'
+        } else {
+          // didn't find matching session
+          console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}'.`)
+          return `Failed to delete dCloud session info for **${datacenter}** **${id}** - not found.`
+        }
+      } catch (e) {
+        // failed db connection?
+        console.log(`collab-toolbot failed database query to get dCloud session '${datacenter} ${id}':`, e.message)
+        return `Error finding dCloud session info for **${datacenter}** **${id}**: ${e.message}`
+      }
+    }
+  }
+}
+
 // handle incoming Spark webhooks - retrieve the message and pass info
 // to the handleMessage function
 async function handleWebhook(body) {
@@ -50,48 +154,23 @@ async function handleMessage({
   mentionedPeople
 }) {
   // console.log(`collab-toolbot message received from Webex Teams user ${personEmail}:`, text)
-
-  // check for command words
-  // break message into words
-  const words = text.split(' ')
-  // var for reply message
-  let message
-  // check for session commands
-  if (words.includes('/session')) {
-    const i = words.indexOf('/session')
-    // session commands
-    if (words[i + 1] === 'delete' || words[i + 1] === 'remove') {
-      // authorize
-      if (!isAuthorized(personEmail, 'session.delete')) {
-        message = `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
-      } else {
-        // continue
-        const datacenter = words[i + 2].toUpperCase()
-        const id = words[i + 3]
-        console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
-        // set up mongo query
-        const query = {
-          id,
-          datacenter
-        }
-        try {
-          // remove from cloud mongo
-          const results = await db.removeOne('dcloud', 'session', query)
-          if (results.deletedCount === 1) {
-            // success
-            console.log(`collab-toolbot found and deleted dCloud session info for '${datacenter} ${id}'.`)
-            // respond in Teams
-            message = `Successfully deleted dCloud session info for **${datacenter}** **${id}**.`
-          } else {
-            // didn't find matching session
-            console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}' to delete.`)
-            message = `Failed to delete dCloud session info for **${datacenter}** **${id}** - not found.`
-          }
-        } catch (e) {
-          // failed db connection?
-          console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}':`, e.message)
-          message = `Error deleting dCloud session info for **${datacenter}** **${id}**: ${e.message}`
-        }
+  try {
+    // check for command words
+    // break message into words
+    const words = text.split(' ')
+    // var for reply message
+    let message
+    // check for session commands
+    if (words.includes('/session')) {
+      // find where we are in the message
+      const i = words.indexOf('/session')
+      // session commands
+      if (['delete', 'remove'].includes(words[i + 1])) {
+        // delete session command
+        message = await session.delete()
+      } else if (['find', 'get', 'show', 'display'].includes(words[i + 1])) {
+        // show session command
+        message = await session.get()
       }
       // send reply message
       try {
@@ -100,6 +179,8 @@ async function handleMessage({
         console.log('collab-toolbot failed to send reply message to Teams:', e.message)
       }
     }
+  } catch (e) {
+    throw e
   }
   // were there any attachments?
   if (files && files.length) {
@@ -169,7 +250,7 @@ async function sendMessage({ toPersonEmail, roomId, text, roomType }) {
   }
 }
 
-function isAuthorized (personEmail, action) {
+function isAuthorized(personEmail, action) {
   // admins defined in .env are authorized for all actions
   if (process.env.ADMINS.split(',').map(v => v.trim()).includes(personEmail)) {
     return true
@@ -177,3 +258,4 @@ function isAuthorized (personEmail, action) {
   // default to false for all others
   return false
 }
+
