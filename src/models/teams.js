@@ -14,7 +14,7 @@ async function handleWebhook(body) {
   // console.log('collab-toolbot - handleWebhook:', body)
   // ignore messages that we sent
   if (body.actorId === body.createdBy) {
-    console.log('Webex Teams message from self. ignoring.')
+    // console.log('Webex Teams message from self. ignoring.')
     return
   }
 
@@ -49,7 +49,7 @@ async function handleMessage({
   created,
   mentionedPeople
 }) {
-  console.log(`collab-toolbot message received from Webex Teams user ${personEmail}:`, text)
+  // console.log(`collab-toolbot message received from Webex Teams user ${personEmail}:`, text)
 
   // check for command words
   // break message into words
@@ -97,13 +97,13 @@ async function handleMessage({
       try {
         await sendMessage({ roomId, toPersonEmail: personEmail, roomType, text: message })
       } catch (e) {
-        console.log('failed to send reply message to Teams:', e.message)
+        console.log('collab-toolbot failed to send reply message to Teams:', e.message)
       }
     }
   }
   // were there any attachments?
   if (files && files.length) {
-    console.log(`Webex Teams webhook had file attachments - but I'm not prepared to handle those yet.`)
+    console.log(`collab-toolbot Webex Teams webhook had file attachments - but I'm not prepared to handle those yet.`)
     // process attachments to send to agent
     // files.forEach(file => {
     //   // are we escalated to an eGain agent?
@@ -140,7 +140,7 @@ async function getSenderInfo(personId) {
 // send facebook message from page to user
 async function sendMessage({ toPersonEmail, roomId, text, roomType }) {
   if (!text || text.length === 0) {
-    return console.log(`Not sending empty string to Webex Teams.`)
+    return console.log(`collab-toolbot - Not sending empty string to Webex Teams.`)
   }
   const url = `https://api.ciscospark.com/v1/messages`
   const body = {
