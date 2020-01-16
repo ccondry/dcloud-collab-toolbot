@@ -81,15 +81,18 @@ const session = {
           } catch (e) {
             console.log('collab-toolbot failed to find DID1 for', datacenter, id)
           }
+          // make sure translations.translation is an array, if it exists
+          if (results.translations && results.translations.translation && !Array.isArray(results.translations.translation)) {
+            results.translations.translation = [results.translations.translation]
+          }
           // add public IP
           try {
             smallResults.publicIp = results.translations.translation.find(v => v.inside === '198.18.135.68').outside
           } catch (e) {
             console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datacenter, id, ':', e.message)
           }
+          // add instant demo VPN public IP
           if (results.instant) {
-            // instant demo = true
-            // add instant demo VPN public IP
             try {
               smallResults.vpnPublicIp = results.translations.translation.find(v => v.inside === '198.18.133.254').outside
             } catch (e) {
