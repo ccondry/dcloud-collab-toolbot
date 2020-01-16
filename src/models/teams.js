@@ -132,7 +132,8 @@ async function sendMessage({toPersonEmail, roomId, text, roomType}) {
   }
   const url = `https://api.ciscospark.com/v1/messages`
   const body = {
-    text
+    text,
+    markdown: text
   }
   // if it was a group
   if (roomType === 'group') {
