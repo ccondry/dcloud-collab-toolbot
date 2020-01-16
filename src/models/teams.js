@@ -52,7 +52,7 @@ const session = {
       // continue
       const datacenter = words[i + 2].toUpperCase()
       const id = words[i + 3]
-      console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
+      console.log(`collab-toolbot received command from ${personEmail} to get dCloud session info for ${datacenter} ${id}`)
       // set up mongo query
       const query = {
         id,
@@ -104,7 +104,7 @@ const session = {
         } else {
           // didn't find matching session
           console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}'.`)
-          return `Failed to delete dCloud session info for **${datacenter}** **${id}** - not found.`
+          return `Failed to get dCloud session info for **${datacenter}** **${id}** - not found.`
         }
       } catch (e) {
         // failed db connection?
