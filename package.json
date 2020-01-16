@@ -1,6 +1,6 @@
 {
   "name": "collab-toolbot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "dCloud Collaboration chat bot for Webex Teams",
   "main": "src/index.js",
   "scripts": {
