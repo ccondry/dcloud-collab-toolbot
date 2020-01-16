@@ -47,7 +47,7 @@ const session = {
   async get (personEmail, words, i) {
     // authorize
     if (!isAuthorized(personEmail, 'session.get')) {
-      return `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
+      return `Failed to run command to get dCloud session - ${personEmail} is not authorized to perform this action.`
     } else {
       // continue
       const datacenter = words[i + 2].toUpperCase()
@@ -59,11 +59,11 @@ const session = {
         datacenter
       }
       try {
-        // remove from cloud mongo
+        // get from cloud mongo
         const results = await db.find('dcloud', 'session', query)
         if (results) {
           // found
-          console.log(`collab-toolbot found and dCloud session info for '${datacenter} ${id}'.`)
+          console.log(`collab-toolbot found dCloud session info for '${datacenter} ${id}'.`)
           // trim results
           const smallResults = {
             datacenter: results.datacenter,
@@ -79,13 +79,13 @@ const session = {
           try {
             smallResults.did1 = results.dids.did.find(v => v.name === 'DID1').number
           } catch (e) {
-            console.log('collab-toolbot failed to find DID1 for', datcenter, id)
+            console.log('collab-toolbot failed to find DID1 for', datacenter, id)
           }
           // add public IP
           try {
             smallResults.publicIp = results.translations.translation.find(v => v.inside === '198.18.135.68').outside
           } catch (e) {
-            console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datcenter, id)
+            console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datacenter, id)
           }
           if (results.instant) {
             // instant demo = true
@@ -93,7 +93,7 @@ const session = {
             try {
               smallResults.vpnPublicIp = results.translations.translation.find(v => v.inside === '198.18.133.254').outside
             } catch (e) {
-              console.log('collab-toolbot failed to find public IP for', '198.18.133.254', 'in', datcenter, id)
+              console.log('collab-toolbot failed to find public IP for', '198.18.133.254', 'in', datacenter, id)
             }
           }
           // respond in Teams with formatted JSON code
@@ -166,10 +166,10 @@ async function handleMessage({
       const i = words.indexOf('/session')
       // session commands
       if (['delete', 'remove'].includes(words[i + 1])) {
-        // delete session command
+        // delete session
         message = await session.delete(personEmail, words, i)
       } else if (['find', 'get', 'show', 'display'].includes(words[i + 1])) {
-        // show session command
+        // get session
         message = await session.get(personEmail, words, i)
       }
       // send reply message
