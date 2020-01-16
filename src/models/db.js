@@ -4,7 +4,7 @@ This provides some simple async methods for using a mongo database
 const MongoClient = require('mongodb').MongoClient
 
 if (!process.env.MONGO_URL) {
-  console.error('dcloud-sparky-api - process.env.MONGO_URL is not defined. Please configure this variable in cumulus-api/.env file.')
+  console.error('collab-toolbot - process.env.MONGO_URL is not defined. Please configure this variable in cumulus-api/.env file.')
 } else {
   try {
     const redacted = process.env.MONGO_URL.split('@').pop()
