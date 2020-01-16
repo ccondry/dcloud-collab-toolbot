@@ -6,9 +6,9 @@ const teams = require('../models/teams')
 
 // webex teams webhook receiver
 router.post('/', async (req, res) => {
-  console.log(`Webex Teams webhook event on app ID ${req.body.id}`)
+  // console.log(`Webex Teams webhook event on app ID ${req.body.id}`)
   if (validateRequest(req, process.env.TEAMS_PAYLOAD_SECRET)) {
-    console.log('Webex Teams webhook event validated.')
+    // console.log('Webex Teams webhook event validated.')
     try {
       await teams.handleWebhook(req.body)
       return res.status(202).send()
