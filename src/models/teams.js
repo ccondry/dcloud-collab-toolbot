@@ -10,7 +10,7 @@ module.exports = {
 
 const session = {
   // delete dcloud session
-  async delete(personEmail, words, i) {
+  async delete (personEmail, words, i) {
     // authorize
     if (!isAuthorized(personEmail, 'session.delete')) {
       return `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
@@ -44,7 +44,7 @@ const session = {
       }
     }
   },
-  async get() {
+  async get (personEmail, words, i) {
     // authorize
     if (!isAuthorized(personEmail, 'session.get')) {
       return `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
@@ -167,10 +167,10 @@ async function handleMessage({
       // session commands
       if (['delete', 'remove'].includes(words[i + 1])) {
         // delete session command
-        message = await session.delete()
+        message = await session.delete(personEmail, words, i)
       } else if (['find', 'get', 'show', 'display'].includes(words[i + 1])) {
         // show session command
-        message = await session.get()
+        message = await session.get(personEmail, words, i)
       }
       // send reply message
       try {
