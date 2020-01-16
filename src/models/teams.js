@@ -1,4 +1,5 @@
 const request = require('request-promise-native')
+const db = require('./db')
 
 module.exports = {
   handleWebhook,
