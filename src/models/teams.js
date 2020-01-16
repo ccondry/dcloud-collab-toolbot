@@ -85,7 +85,7 @@ const session = {
           try {
             smallResults.publicIp = results.translations.translation.find(v => v.inside === '198.18.135.68').outside
           } catch (e) {
-            console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datacenter, id)
+            console.log('collab-toolbot failed to find public IP for', '198.18.135.68', 'in', datacenter, id, ':', e.message)
           }
           if (results.instant) {
             // instant demo = true
@@ -93,7 +93,7 @@ const session = {
             try {
               smallResults.vpnPublicIp = results.translations.translation.find(v => v.inside === '198.18.133.254').outside
             } catch (e) {
-              console.log('collab-toolbot failed to find public IP for', '198.18.133.254', 'in', datacenter, id)
+              console.log('collab-toolbot failed to find public IP for', '198.18.133.254', 'in', datacenter, id, ':', e.message)
             }
           }
           // respond in Teams with formatted JSON code
