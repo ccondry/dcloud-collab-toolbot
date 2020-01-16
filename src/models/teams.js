@@ -50,7 +50,7 @@ async function handleMessage (roomType, {
   const words = text.split(' ')
   // remove the @metion
   if (words.includes('/session')) {
-    const i = words.find('/session')
+    const i = words.indexOf('/session')
     // session commands
     if (words[i+1] === 'delete' || words[i+1] === 'remove') {
       const datacenter = words[i+2].toUpperCase()
