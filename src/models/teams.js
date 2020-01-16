@@ -141,13 +141,16 @@ async function sendMessage({toPersonEmail, roomId, text, roomType}) {
     // direct message
     body.toPersonEmail = toPersonEmail
   }
-  const options = {
-    headers: {
-      'Authorization': `Bearer ${process.env.WEBEX_BOT_TOKEN}`
-    }
-  }
   try {
-    await request.post(url, body, options)
+    await request({
+      method: 'POST',
+      url,
+      body, 
+      headers: {
+        'Authorization': `Bearer ${process.env.WEBEX_BOT_TOKEN}`
+      },
+      json: true
+    })
   } catch (e) {
     throw e
   }
