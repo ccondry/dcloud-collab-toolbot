@@ -60,7 +60,7 @@ const session = {
       }
       try {
         // get from cloud mongo
-        const results = await db.find('dcloud', 'session', query)
+        const results = await db.findOne('dcloud', 'session', query)
         if (results) {
           // found
           console.log(`collab-toolbot found dCloud session info for '${datacenter} ${id}'.`)
