@@ -1,0 +1,21 @@
+[Unit]
+Description=dCloud Collaboration chat bot API service script
+Documentation=https://github.com/ccondry/dcloud-collab-toolbot#README
+After=network.target
+StartLimitInterval=2000
+StartLimitBurst=5
+
+[Service]
+Restart=always
+RestartSec=5
+User=root
+Group=root
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/opt/dcloud/collab-toolbot/
+Type=simple
+ExecStart=/usr/local/bin/node /opt/dcloud/collab-toolbot/src/index.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

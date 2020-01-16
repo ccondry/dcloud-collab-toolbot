@@ -1,0 +1,34 @@
+{
+  "name": "collab-toolbot",
+  "version": "0.1.0",
+  "description": "dCloud Collaboration chat bot for Webex Teams",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ccondry/dcloud-collab-toolbot.git"
+  },
+  "keywords": [
+    "webex.teams",
+    "teams",
+    "bot",
+    "toolbox"
+  ],
+  "author": "Coty Condry <ccondry@cisco.com>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ccondry/dcloud-collab-toolbot/issues"
+  },
+  "homepage": "https://github.com/ccondry/dcloud-collab-toolbot#README",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.8"
+  }
+}

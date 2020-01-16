@@ -1,0 +1,2 @@
+# Allow 'administrator' user to restart collab-toolbot service
+administrator ALL=NOPASSWD: /bin/systemctl restart collab-toolbot.service
