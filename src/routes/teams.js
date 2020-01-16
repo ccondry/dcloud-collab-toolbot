@@ -5,7 +5,7 @@ const crypto = require('crypto')
 const teams = require('../models/teams')
 
 // webex teams webhook receiver
-router.post('/webhook', async (req, res) => {
+router.post('/', async (req, res) => {
   console.log(`Webex Teams webhook event on app ID ${req.body.id}`)
   if (validateRequest(req, process.env.TEAMS_PAYLOAD_SECRET)) {
     console.log('Webex Teams webhook event validated.')

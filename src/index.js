@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 
 // Cisco Webex Teams webhooks
-app.use('/api/v1/teams', require('./routes/teams'))
+app.use('/api/v1/webhook', require('./routes/teams'))
 
 // listen on port defined in .env
 const server = app.listen(process.env.PORT || 3020, () => {
