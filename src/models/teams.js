@@ -48,11 +48,13 @@ async function handleMessage (roomType, {
   // check for command words
   // break message into words
   const words = text.split(' ')
-  if (words[0] === '/session') {
+  // remove the @metion
+  if (words.includes('/session')) {
+    const i = words.find('/session')
     // session commands
-    if (words[1] === 'delete' || words[1] === 'remove') {
-      const datacenter = words[2]
-      const id = words[3]
+    if (words[i+1] === 'delete' || words[i+1] === 'remove') {
+      const datacenter = words[i+2].toUpperCase()
+      const id = words[i+3]
       console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
       // set up mongo query
       const query = {
