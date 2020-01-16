@@ -18,17 +18,19 @@ async function handleWebhook (body) {
   }
 
   const roomType = body.data.roomType
-  // go retrieve the message details
   const messageId = body.data.id
-  const options = {
-    headers: {
-      'Authorization': `Bearer ${process.env.WEBEX_BOT_TOKEN}`
-    }
-  }
   try {
-    const response = await request.get(`https://api.ciscospark.com/v1/messages/${messageId}`, options)
-    console.log('teams message response.data:', response.data)
-    await handleMessage(response.data)
+    // go retrieve the message details
+    const response = await request({
+      method: 'GET',
+      url: `https://api.ciscospark.com/v1/messages/${messageId}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.WEBEX_BOT_TOKEN}`
+      },
+      json: true
+    })
+    console.log('teams message response:', response)
+    await handleMessage(roomType, response)
   } catch (e) {
     console.error('error during Webex Teams handleWebhook', e.message)
   }
