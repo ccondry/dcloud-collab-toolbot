@@ -10,8 +10,8 @@ module.exports = {
 
 // handle incoming Spark webhooks - retrieve the message and pass info
 // to the handleMessage function
-async function handleWebhook (body) {
-  console.log('collab-toolbot - handleWebhook:', body)
+async function handleWebhook(body) {
+  // console.log('collab-toolbot - handleWebhook:', body)
   // ignore messages that we sent
   if (body.actorId === body.createdBy) {
     console.log('Webex Teams message from self. ignoring.')
@@ -30,60 +30,72 @@ async function handleWebhook (body) {
       },
       json: true
     })
-    console.log('teams message response:', response)
-    await handleMessage(roomType, response)
+    // console.log('teams message response:', response)
+    await handleMessage(response)
   } catch (e) {
     console.error('error during Webex Teams handleWebhook', e.message)
   }
 }
 
-async function handleMessage (roomType, {
-  text,
-  personEmail,
-  personId,
+async function handleMessage({
+  id,
   roomId,
+  roomType,
+  text,
+  personId,
+  personEmail,
+  html,
   files,
+  created,
+  mentionedPeople
 }) {
   console.log(`collab-toolbot message received from Webex Teams user ${personEmail}:`, text)
 
   // check for command words
   // break message into words
   const words = text.split(' ')
-  // remove the @metion
+  // var for reply message
+  let message
+  // check for session commands
   if (words.includes('/session')) {
     const i = words.indexOf('/session')
     // session commands
-    if (words[i+1] === 'delete' || words[i+1] === 'remove') {
-      const datacenter = words[i+2].toUpperCase()
-      const id = words[i+3]
-      console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
-      // set up mongo query
-      const query = {
-        id,
-        datacenter
-      }
-      let message
-      try {
-        // remove from cloud mongo
-        const results = await db.removeOne('dcloud', 'session', query)
-        if (results.deletedCount === 1) {
-          // success
-          console.log(`collab-toolbot found and deleted dCloud session info for '${datacenter} ${id}'.`)
-          // respond in Teams
-          message = `Successfully deleted dCloud session info for **${datacenter}** **${id}.`
-        } else {
-          // didn't find matching session
-          console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}' to delete.`)
-          message = `Failed to delete dCloud session info for **${datacenter}** **${id} - not found.`
+    if (words[i + 1] === 'delete' || words[i + 1] === 'remove') {
+      // authorize
+      if (!isAuthorized(personEmail, 'session.delete')) {
+        message = `Failed to run command to delete dCloud session - ${personEmail} is not authorized to perform this action.`
+      } else {
+        // continue
+        const datacenter = words[i + 2].toUpperCase()
+        const id = words[i + 3]
+        console.log(`collab-toolbot received command from ${personEmail} to delete dCloud session info for ${datacenter} ${id}`)
+        // set up mongo query
+        const query = {
+          id,
+          datacenter
         }
-      } catch (e) {
-        // failed db connection?
-        console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}':`, e.message)
-        message = `Error deleting dCloud session info for **${datacenter}** **${id}: ${e.message}`
+        try {
+          // remove from cloud mongo
+          const results = await db.removeOne('dcloud', 'session', query)
+          if (results.deletedCount === 1) {
+            // success
+            console.log(`collab-toolbot found and deleted dCloud session info for '${datacenter} ${id}'.`)
+            // respond in Teams
+            message = `Successfully deleted dCloud session info for **${datacenter}** **${id}**.`
+          } else {
+            // didn't find matching session
+            console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}' to delete.`)
+            message = `Failed to delete dCloud session info for **${datacenter}** **${id}** - not found.`
+          }
+        } catch (e) {
+          // failed db connection?
+          console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}':`, e.message)
+          message = `Error deleting dCloud session info for **${datacenter}** **${id}**: ${e.message}`
+        }
       }
       // send reply message
       try {
-        await sendMessage({roomId, toPersonEmail: personEmail, roomType, text: message})
+        await sendMessage({ roomId, toPersonEmail: personEmail, roomType, text: message })
       } catch (e) {
         console.log('failed to send reply message to Teams:', e.message)
       }
@@ -126,7 +138,7 @@ async function getSenderInfo(personId) {
 }
 
 // send facebook message from page to user
-async function sendMessage({toPersonEmail, roomId, text, roomType}) {
+async function sendMessage({ toPersonEmail, roomId, text, roomType }) {
   if (!text || text.length === 0) {
     return console.log(`Not sending empty string to Webex Teams.`)
   }
@@ -146,7 +158,7 @@ async function sendMessage({toPersonEmail, roomId, text, roomType}) {
     await request({
       method: 'POST',
       url,
-      body, 
+      body,
       headers: {
         'Authorization': `Bearer ${process.env.WEBEX_BOT_TOKEN}`
       },
@@ -155,4 +167,13 @@ async function sendMessage({toPersonEmail, roomId, text, roomType}) {
   } catch (e) {
     throw e
   }
+}
+
+function isAuthorized (personEmail, action) {
+  // admins defined in .env are authorized for all actions
+  if (process.env.ADMINS.split(',').map(v => v.trim()).includes(personEmail)) {
+    return true
+  }
+  // default to false for all others
+  return false
 }
