@@ -73,10 +73,12 @@ async function handleMessage (roomType, {
         } else {
           // didn't find matching session
           console.log(`collab-toolbot didn't find a dCloud session matching '${datacenter} ${id}' to delete.`)
+          message = `Failed to delete dCloud session info for **${datacenter}** **${id} - not found.`
         }
       } catch (e) {
         // failed db connection?
-        console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}'.`)
+        console.log(`collab-toolbot failed database query to delete dCloud session '${datacenter} ${id}':`, e.message)
+        message = `Error deleting dCloud session info for **${datacenter}** **${id}: ${e.message}`
       }
       // send reply message
       try {
